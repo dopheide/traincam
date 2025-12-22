@@ -1,7 +1,12 @@
+#!/usr/bin/env python3
+
 import cv2
 import pytesseract
 import os
 import re
+
+def TestWorks():
+    return True
 
 def scale_and_gray(image):
 
@@ -37,10 +42,32 @@ def extract_train_numbers(image):
     numbers = list()
     for r in results:
         if len(r) == 4 and r.isdigit():
-            numbers.append(r)
+            numbers.append(int(r))
 
     return numbers
 
+def ProcessTrain(image_path):
+    img = cv2.imread(image_path)
+    if img is None:
+        raise ValueError(f"Could not read image: {image_path}")
+
+    print(f"Processing {image_path}...")
+    gray = scale_and_gray(img)
+    thresh = gray_to_thresh(gray)
+
+    # threshold results are better for train 2875 (otherwise it shows 2675)
+    # but just gray is better for others.
+
+    numbers = extract_train_numbers(thresh)
+    if(len(numbers) != 1):
+        numbers = extract_train_numbers(gray)
+
+    if(len(numbers) != 1):
+        # get crazy
+        thresh = no_really(gray)
+        numbers = extract_train_numbers(thresh)
+    
+    return numbers
 
 def main():
     image_dir_path = "trains"
@@ -52,29 +79,12 @@ def main():
     for f in dl:
         m = re.search(r'^([0-9]+)\.png',f)
         if(m):
-            train_num = m.group(1)
+            train_num = int(m.group(1))
 
             try:
                 image_path = image_dir_path + "/" + f
-                img = cv2.imread(str(image_path))
-                if img is None:
-                    raise ValueError(f"Could not read image: {image_path}")
 
-                print(f"Processing {f}...")
-                gray = scale_and_gray(img)
-                thresh = gray_to_thresh(gray)
-
-                # threshold results are better for train 2875 (otherwise it shows 2675)
-                # but just gray is better for others.
-
-                numbers = extract_train_numbers(thresh)
-                if(len(numbers) != 1):
-                    numbers = extract_train_numbers(gray)
-
-                if(len(numbers) != 1):
-                    # get crazy
-                    thresh = no_really(gray)
-                    numbers = extract_train_numbers(thresh)
+                numbers = ProcessTrain(image_path)
 
                 if(train_num in numbers):
                     status=True
