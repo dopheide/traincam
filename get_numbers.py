@@ -63,7 +63,7 @@ def ProcessTrain(image_path):
         numbers = extract_train_numbers(gray)
 
     if(len(numbers) != 1):
-        # get crazy
+        # get crazy.  This seems to work for black numbers on a red/orange train.
         thresh = no_really(gray)
         numbers = extract_train_numbers(thresh)
     
@@ -72,9 +72,6 @@ def ProcessTrain(image_path):
 def main():
     image_dir_path = "trains"
     dl = os.listdir(image_dir_path)
-
-## TODO, seems like we can do really well trying just gray scale, and then if that doesn't
-# succeed, add a threshold
 
     for f in dl:
         m = re.search(r'^([0-9]+)\.png',f)
