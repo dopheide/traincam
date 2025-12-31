@@ -58,7 +58,10 @@ def ProcessTrain(image_path):
     # threshold results are better for train 2875 (otherwise it shows 2675)
     # but just gray is better for others.
 
+    # Try the first threshold
     numbers = extract_train_numbers(thresh)
+
+    # Try grayscale
     if(len(numbers) != 1):
         numbers = extract_train_numbers(gray)
 
@@ -66,7 +69,13 @@ def ProcessTrain(image_path):
         # get crazy.  This seems to work for black numbers on a red/orange train.
         thresh = no_really(gray)
         numbers = extract_train_numbers(thresh)
-    
+
+    # just try the original image.
+    # This works best for white numbers on a black train (odd right?)
+    # But doing this first misreads the 2875 train as 2675
+    if(len(numbers) != 1):
+        numbers = extract_train_numbers(img)
+
     return numbers
 
 def main():
